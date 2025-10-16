@@ -165,7 +165,6 @@ a:hover {
   width: 90%;
   margin: 20px auto;
   cursor: pointer;
-  border-left: 6px solid var(--color-primary);
   background-color: var(--color-cream);
   padding: 25px 30px;
   border: 1px solid #c0c0c0;
@@ -682,4 +681,5 @@ h3 {
     font-size: 1.1rem; /* Restores standard H4 size */
 
 }
+
 
