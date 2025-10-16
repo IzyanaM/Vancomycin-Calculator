@@ -173,6 +173,7 @@ a:hover {
   box-sizing: border-box;
   border: 1px solid #c0c0c0;
   border-left: 8px solid var(--color-primary);
+  overflow: hidden;
 }
 
 .calc-selection-card:hover {
@@ -682,6 +683,7 @@ h3 {
     font-size: 1.1rem; /* Restores standard H4 size */
 
 }
+
 
 
 
