@@ -10,9 +10,6 @@
   --color-red-placeholder: #C62828; /* Red for TDM placeholders */
   --font-main: 'Poppins', sans-serif;
   --shadow-soft: 0 4px 8px rgba(0, 0, 0, 0.1);
-  --maroon: #6b0f0f;
-  --maroon-dark: #500b0b;
-  --white: #ffffff;
 }
 
 * {
@@ -173,7 +170,7 @@ a:hover {
   transition: transform 0.2s, box-shadow 0.2s;
   box-sizing: border-box;
   border: 1px solid #c0c0c0;
-  border-left: 8px solid var(--maroon);
+  border-left: 8px solid var(--color-primary);
 }
 
 .calc-selection-card:hover {
@@ -683,6 +680,7 @@ h3 {
     font-size: 1.1rem; /* Restores standard H4 size */
 
 }
+
 
 
 
