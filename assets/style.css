@@ -179,7 +179,7 @@ a:hover {
 }
 
 .calc-selection-card:hover {
-  transform: translateY(-3px);
+  transform: translateY(-4px);
   box-shadow: 0 6px 14px rgba(0,0,0,0.15);
     background:
     linear-gradient(to right, var(--maroon-dark) 8px, transparent 8px),
@@ -688,6 +688,7 @@ h3 {
     font-size: 1.1rem; /* Restores standard H4 size */
 
 }
+
 
 
 
