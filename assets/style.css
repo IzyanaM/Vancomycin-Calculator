@@ -10,6 +10,9 @@
   --color-red-placeholder: #C62828; /* Red for TDM placeholders */
   --font-main: 'Poppins', sans-serif;
   --shadow-soft: 0 4px 8px rgba(0, 0, 0, 0.1);
+  --maroon: #6b0f0f;
+  --maroon-dark: #500b0b;
+  --white: #ffffff;
 }
 
 * {
@@ -162,21 +165,25 @@ a:hover {
 
 /* --- Page 1: Calculator Selection Cards --- */
 .calc-selection-card {
-  width: 90%;
-  margin: 20px auto;
+  background: 
+    linear-gradient(to right, var(--maroon) 8px, transparent 8px),
+    linear-gradient(to bottom, #F4F4F4, var(--white));
+  border-radius: 15px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  padding: 8px 20px;
   cursor: pointer;
-  background-color: var(--color-cream);
-  padding: 25px 30px;
-  border-radius: 8px;
+  transition: transform 0.2s, box-shadow 0.2s;
+  box-sizing: border-box;
   border: 1px solid #c0c0c0;
-  border-left: 8px solid #6b0f0f;
-  box-shadow: var(--shadow-soft);
-  transition: transform 0.2s, background-color 0.2s;
+  background-origin: border-box;
 }
 
 .calc-selection-card:hover {
-  transform: scale(1.02);
-  background-color: #fdf2e7;
+  transform: translateY(-3px);
+  box-shadow: 0 6px 14px rgba(0,0,0,0.15);
+    background:
+    linear-gradient(to right, var(--maroon-dark) 8px, transparent 8px),
+    linear-gradient(to bottom, #F4F4F4, var(--white));
 }
 
 .card-title {
@@ -681,6 +688,7 @@ h3 {
     font-size: 1.1rem; /* Restores standard H4 size */
 
 }
+
 
 
 
