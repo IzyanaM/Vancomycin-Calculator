@@ -165,10 +165,10 @@ a:hover {
 
 /* --- Page 1: Calculator Selection Cards --- */
 .calc-selection-card {
-  background: linear-gradient(to bottom, #F4F4F4, var(--color-cream));
+  background: var(--color-cream)
   border-radius: 15px;
   box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-  padding: 8px 20px;
+  padding: 16px 24px;
   cursor: pointer;
   transition: transform 0.2s, box-shadow 0.2s;
   box-sizing: border-box;
@@ -683,6 +683,7 @@ h3 {
     font-size: 1.1rem; /* Restores standard H4 size */
 
 }
+
 
 
 
