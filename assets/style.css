@@ -165,25 +165,20 @@ a:hover {
 
 /* --- Page 1: Calculator Selection Cards --- */
 .calc-selection-card {
-  background: 
-    linear-gradient(to right, var(--maroon) 8px, transparent 8px),
-    linear-gradient(to bottom, #F4F4F4, var(--white));
+  background: linear-gradient(to bottom, #F4F4F4, var(--color-cream));
   border-radius: 15px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
   padding: 8px 20px;
   cursor: pointer;
   transition: transform 0.2s, box-shadow 0.2s;
   box-sizing: border-box;
   border: 1px solid #c0c0c0;
-  background-origin: border-box;
+  border-left: 8px solid var(--maroon);
 }
 
 .calc-selection-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 6px 14px rgba(0,0,0,0.15);
-    background:
-    linear-gradient(to right, var(--maroon-dark) 8px, transparent 8px),
-    linear-gradient(to bottom, #F4F4F4, var(--white));
+  transform: translateY(-5px);
+  box-shadow: 0 6px 12px rgba(0,0,0,0.15);
 }
 
 .card-title {
@@ -688,6 +683,7 @@ h3 {
     font-size: 1.1rem; /* Restores standard H4 size */
 
 }
+
 
 
 
