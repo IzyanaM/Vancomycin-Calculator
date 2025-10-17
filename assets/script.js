@@ -1,13 +1,13 @@
 // --- LOOKUP TABLES & CONSTANTS ---
 const LD_CRCL_BELOW_30 = [
-    { maxWeight: 49.9, dose: 1000 }, { maxWeight: 69.9, dose: 1500 },
+    { maxWeight: 49.9, dose: 1000 }, { maxWeight: 59.9, dose: 1250 },
     { maxWeight: 79.9, dose: 1500 }, { maxWeight: 89.9, dose: 1750 },
-    { maxWeight: 99.9, dose: 2000 }, { maxWeight: Infinity, dose: 2000 }
+    { maxWeight: Infinity, dose: 2000 }
 ];
 const LD_CRCL_ABOVE_30 = [
     { maxWeight: 49.9, dose: 1000 }, { maxWeight: 59.9, dose: 1250 },
     { maxWeight: 69.9, dose: 1500 }, { maxWeight: 79.9, dose: 1750 },
-    { maxWeight: 89.9, dose: 2000 }, { maxWeight: Infinity, dose: 2000 }
+    { maxWeight: Infinity, dose: 2000 }
 ];
 const LD_HD_BEFORE = [
     { maxWeight: 49.9, dose: 1000, topUp: 250 }, { maxWeight: 59.9, dose: 1000, topUp: 300 },
@@ -21,21 +21,17 @@ const LD_HD_DURING = [
     { maxWeight: 89.9, dose: 2000 }, { maxWeight: Infinity, dose: 2000 }
 ];
 const MD_CRCL_15_29 = [
-    { minWeight: 40, maxWeight: 59.9, dose: '500 mg OD (6:00 AM)' },
-    { minWeight: 60, maxWeight: 74.9, dose: '500 mg OD (6:00 AM)' },
-    { minWeight: 75, maxWeight: 89.9, dose: '750 mg OD (6:00 AM)' },
-    { minWeight: 90, maxWeight: Infinity, dose: '750 mg OD (6:00 AM)' }
+    { minWeight: 40, maxWeight: 74.9, dose: '500 mg OD (6:00 AM)' },
+    { minWeight: 75, maxWeight: Infinity, dose: '750 mg OD (6:00 AM)' }
 ];
 const MD_CRCL_30_49 = [
     { minWeight: 40, maxWeight: 49.9, dose: '500 mg OD (6:00 AM)' },
-    { minWeight: 50, maxWeight: 59.9, dose: '750 mg OD (6:00 AM)' },
-    { minWeight: 60, maxWeight: 74.9, dose: '750 mg OD (6:00 AM)' },
+    { minWeight: 50, maxWeight: 74.9, dose: '750 mg OD (6:00 AM)' },
     { minWeight: 75, maxWeight: 89.9, dose: '500 mg BD (6:00 AM & 6:00 PM)' },
     { minWeight: 90, maxWeight: Infinity, dose: '750 mg BD (6:00 AM & 6:00 PM)' }
 ];
 const MD_CRCL_50_59 = [
-    { minWeight: 40, maxWeight: 49.9, dose: '750 mg OD (6:00 AM)' },
-    { minWeight: 50, maxWeight: 59.9, dose: '750 mg OD (6:00 AM)' },
+    { minWeight: 40, maxWeight: 59.9, dose: '750 mg OD (6:00 AM)' },
     { minWeight: 60, maxWeight: 74.9, dose: '500 mg BD (6:00 AM & 6:00 PM)' },
     { minWeight: 75, maxWeight: 89.9, dose: '750 mg BD (6:00 AM & 6:00 PM)' },
     { minWeight: 90, maxWeight: Infinity, dose: '1,000 mg BD (6:00 AM & 6:00 PM)' }
@@ -73,7 +69,7 @@ function getDose(weight, table) {
 }
 
 function getMaintenanceDose(weight, table) {
-    const mdData = table.find(item => weight >= item.minWeight && weight <= item.maxWeight + 0.1);
+    const mdData = table.find(item => weight >= item.minWeight && weight <= (item.maxWeight === Infinity ? Infinity : item.maxWeight));
     if (!mdData) return null;
     
     const parts = mdData.dose.split(' ');
@@ -82,6 +78,7 @@ function getMaintenanceDose(weight, table) {
     
     return { dose, doseText: parts[0], freqText, fullDoseText: mdData.dose, roundedDose: Math.round(dose / 250) * 250 };
 }
+
 
 function getAdminInstruction(dose, ivAccessType) {
     if (!dose) return null;
@@ -584,14 +581,12 @@ mdAdminRegimenText = `${fullDoseTextClean}, dilute each dose in ${mdAdmin.diluti
   if(document.getElementById('noteMDRegimen')) document.getElementById('noteMDRegimen').textContent = mdAdminRegimenText.replace('IV Q', 'IV q');
 }
 
- // --- COPY TO NOTES LOGIC (FINAL CORRECTED) ---
+// --- COPY TO NOTES LOGIC (FINAL CORRECTED) ---
 function copyClinicalNote() {
   // Define the base styles for the note
   const bodyInlineStyle = `font-family: Arial, Helvetica, sans-serif; font-size: 13px;`;
-  
-  // Define the style for the SECTION TITLES (Recommended Regimen, TDM, etc.)
   const titleInlineStyle = `
-      color: #800000; /* Dark Maroon */
+      color: #800000; 
       font-weight: 700; 
       font-style: italic; 
       font-size: 13px; 
@@ -602,58 +597,98 @@ function copyClinicalNote() {
   
   // 1. Create a temporary container to manipulate the HTML without affecting the live page
   const tempDiv = document.createElement('div');
-  tempDiv.innerHTML = htmlContentDiv.innerHTML;
+  tempDiv.innerHTML = htmlContentDiv.innerHTML; 
   
-  // 2. Apply body styles to the entire container for the base font
-  tempDiv.setAttribute('style', bodyInlineStyle);
+  // 2. APPLY USER INPUT VALUES TO THE COPIED HTML CONTENT (Rich Text Fixes)
+  
+  // Elements to fix in the cloned HTML (these are the elements containing the inputs)
+  const drInput_temp = tempDiv.querySelector('#dr_input');
+  const noteTDM1_temp = tempDiv.querySelector('#noteTDM1'); 
+  const noteTDM2_temp = tempDiv.querySelector('#noteTDM2');
 
-  // 3. Apply style to the SECTION TITLES (e.g., Recommended Regimen)
+  const replaceInputWithValue = (liveInput, clonedInput) => {
+    if (!liveInput || !clonedInput) return;
+    
+    // Get the value the user typed in (or the placeholder if empty)
+    const userValue = liveInput.value.trim() || liveInput.placeholder;
+    const valueToInsert = `<span style="text-decoration: underline;">${userValue}</span>`;
+    
+    // Replace the input field in the cloned HTML with the styled text
+    clonedInput.outerHTML = valueToInsert;
+  };
+  
+  // --- Fix Doctor's Name (Direct Input Element) ---
+  const drInputLive = document.getElementById('dr_input');
+  if(drInputLive && drInput_temp) {
+      replaceInputWithValue(drInputLive, drInput_temp);
+  }
+
+  // --- Fix TDM Date/Time (Input Elements Nested in #noteTDM1/2) ---
+  const liveTDMInput1 = document.getElementById('noteTDM1') ? document.getElementById('noteTDM1').querySelector('input') : null;
+  const liveTDMInput2 = document.getElementById('noteTDM2') ? document.getElementById('noteTDM2').querySelector('input') : null;
+  const clonedTDMInput1 = noteTDM1_temp ? noteTDM1_temp.querySelector('input') : null;
+  const clonedTDMInput2 = noteTDM2_temp ? noteTDM2_temp.querySelector('input') : null;
+  
+  if (liveTDMInput1 && clonedTDMInput1) {
+      replaceInputWithValue(liveTDMInput1, clonedTDMInput1);
+  }
+  if (liveTDMInput2 && clonedTDMInput2) {
+      replaceInputWithValue(liveTDMInput2, clonedTDMInput2);
+  }
+
+
+  // 3. Apply styles (as before)
+  tempDiv.setAttribute('style', bodyInlineStyle);
   tempDiv.querySelectorAll('.card-title').forEach(titleElement => {
       titleElement.setAttribute('style', titleInlineStyle);
   });
-  
-  // 4. Apply style to the REGIMEN LINES
   tempDiv.querySelectorAll('.bold-highlight').forEach(element => {
-      
-      // A. CRITICAL FIX: Apply black and normal weight to the PARENT P tag (kills red inheritance)
-      element.setAttribute('style', `font-weight: 400; color: #000000; font-size: 13px;`);
-
-      // B. Target the bold label (<strong>) and make it black bold
+      element.setAttribute('style', `color: #000000; font-weight: 400; font-size: 13px;`);
       const labelStrong = element.querySelector('strong');
       if(labelStrong) {
           labelStrong.setAttribute('style', 'font-weight: 700; color: #000000;');
       }
-
-      // C. Target the regimen details (<span>) and ensure it's black normal weight
-      const detailSpan = element.querySelector('span');
-      if(detailSpan) {
-          detailSpan.setAttribute('style', 'font-weight: 400; color: #000000;');
-      }
   });
-  
-  // 5. Apply normal font and black color to all general lists/text to override any inheritance
   tempDiv.querySelectorAll('p, li, ul').forEach(element => {
-      // Ensure general text is black and normal weight
       if(!element.classList.contains('card-title')) {
          element.style.color = '#000000';
          element.style.fontWeight = '400';
       }
   });
   
-  // 6. Get the modified HTML content from the temporary div
   const htmlToCopy = tempDiv.innerHTML;
 
 
-  // --- Prepare the Plain Text (corrected logic) ---
+  // --- Prepare the Plain Text (This section should be fine) ---
   
-  // 1. Retrieve the doctor's name for plain text copy
-  const doctorInput = document.getElementById('dr_input') ? document.getElementById('dr_input').value : '';
-  const doctorNamePlaceholder = doctorInput || '_______________'; 
-  const introTextPlain = `Received query from Dr ${doctorNamePlaceholder} regarding IV Vancomycin initiation for this patient.`;
+  const doctorNamePlaceholder = drInputLive ? drInputLive.value.trim() : '_______________';
+  // Use the new requested wording for the intro sentence
+  const introTextPlain = `Received query regarding IV Vancomycin initiation for this patient from Dr: ${doctorNamePlaceholder}`;
   
-  const abw = document.getElementById('abw').value;
+  const getTDMTextFromLiveDOM = (elementId) => {
+    const element = document.getElementById(elementId);
+    if (!element) return '';
+    
+    let baseText = element.textContent.trim();
+    
+    const input = element.querySelector('input');
+    // CRITICAL: We need the value from the live input, not the placeholder text
+    const userValue = input ? (input.value.trim() || input.placeholder) : '';
+    
+    // Replace the specific placeholder symbol \u25CF in the text content
+    return baseText.replace('\u25CF', userValue).replace('— Date & time:', 'Date/Time:').replace('.', '').trim();
+  };
+  
+  const tdm1 = getTDMTextFromLiveDOM('noteTDM1');
+  const tdm2 = getTDMTextFromLiveDOM('noteTDM2');
+
+  let textToCopy = '--- Hospital Sungai Buloh Clinical Note ---\n\n';
+  textToCopy += 'VANCOMYCIN THERAPY RECOMMENDATION\n\n';
+  textToCopy += introTextPlain + '\n\n'; 
+  
+  const abw = parseFloat(document.getElementById('abw').value);
   const statusText = document.getElementById('dialysisStatus').options[document.getElementById('dialysisStatus').selectedIndex].text;
-  const crcl = document.getElementById('crcl').value;
+  const crclValue = document.getElementById('crcl').value;
   const indicationText = document.getElementById('indication').options[document.getElementById('indication').selectedIndex].text;
   const ivAccessText = document.getElementById('ivAccess').options[document.getElementById('ivAccess').selectedIndex].text;
   const noteLDRegimenText = document.getElementById('noteLDRegimen').textContent;
@@ -661,24 +696,14 @@ function copyClinicalNote() {
   
   if (noteMDRegimenText.includes('not applicable')) noteMDRegimenText = 'Maintenance dose based on TDM. Contact TDM Pharmacy for advice.';
   
-  const tdm1 = document.getElementById('noteTDM1').textContent.replace('— Date & time:', '[Date/Time: _______________]').trim();
-  const tdm2 = document.getElementById('noteTDM2').textContent.replace('— Date & time:', '[Date/Time: _______________]').trim();
-
-  // Start building the final plain text string
-  let textToCopy = '--- Hospital Sungai Buloh Clinical Note ---\n\n';
-  
-  textToCopy += 'VANCOMYCIN THERAPY RECOMMENDATION\n\n';
-  textToCopy += introTextPlain + '\n\n'; 
-  
   textToCopy += 'Patient Summary (as provided by the primary care team):\n';
   textToCopy += `• Actual Body Weight: ${abw} kg\n`;
   textToCopy += `• Dialysis Status: ${statusText}\n`;
   if (statusText.includes('Haemodialysis')) textToCopy += `• Vancomycin Timing: ${document.getElementById('dialysisTiming').options[document.getElementById('dialysisTiming').selectedIndex].text.replace('Vancomycin started or planned to be given ', '')}\n`;
   
-  // Include SCr and CrCl together
   if (statusText === 'Not on Haemodialysis') {
       textToCopy += `• Serum Creatinine (µmol/L): ${document.getElementById('scr_input').value}\n`;
-      textToCopy += `• Creatinine Clearance: ${crcl} ml/min\n`;
+      textToCopy += `• Creatinine Clearance: ${crclValue} ml/min\n`;
   }
   
   textToCopy += `• Indication: ${indicationText}\n`;
@@ -689,18 +714,17 @@ function copyClinicalNote() {
   textToCopy += `Maintenance Dose: ${noteMDRegimenText}\n\n`;
 
   textToCopy += 'Therapeutic Drug Monitoring (TDM):\n';
-  if(tdm1) textToCopy += `• ${tdm1}\n`;
-  if(tdm2) textToCopy += `• ${tdm2}\n`;
-
+  if(tdm1 && tdm1 !== 'TDM instructions not generated.') textToCopy += `• ${tdm1}\n`;
+  if(tdm2 && tdm2.includes('Post-level')) textToCopy += `• ${tdm2}\n`;
+  
   textToCopy += '\nRemarks:\n';
   textToCopy += '• Monitor renal profile (RP) and urine output regularly.\n';
   textToCopy += '• Ensure the patient remains well hydrated while on Vancomycin.\n';
   textToCopy += '• Avoid concomitant nephrotoxic agents where possible.\n';
   textToCopy += '• Infusion rate must not exceed 10 mg/min to minimize infusion-related reactions.\n';
   textToCopy += '-----------------------------------------------------------\n';
-
-
-  // 7. Write both HTML and Plain Text to the clipboard
+  
+  // 8. Write both HTML and Plain Text to the clipboard (as before)
   const blobHtml = new Blob([htmlToCopy], { type: 'text/html' });
   const blobPlain = new Blob([textToCopy], { type: 'text/plain' });
 
