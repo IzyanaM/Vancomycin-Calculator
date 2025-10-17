@@ -164,12 +164,12 @@ a:hover {
 .calc-selection-card {
   width: 90%;
   margin: 20px auto;
-  background: var(--color-cream)
+  background: var(--color-cream);
   border-radius: 15px;
   box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-  padding: 25px 30px;
+  padding: 30px 30px;
   cursor: pointer;
-  transition: transform 0.2s, box-shadow 0.2s;
+  transition: transform 0.2s, box-shadow 0.2s; background 0.2s;
   box-sizing: border-box;
   border: 1px solid #c0c0c0;
   border-left: 8px solid var(--color-primary);
@@ -179,6 +179,7 @@ a:hover {
 .calc-selection-card:hover {
   transform: translateY(-5px);
   box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+  background: #F2E1D2;
 }
 
 .card-title {
@@ -683,7 +684,6 @@ h3 {
     font-size: 1.1rem; /* Restores standard H4 size */
 
 }
-
 
 
 
