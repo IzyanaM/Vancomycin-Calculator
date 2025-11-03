@@ -4,7 +4,7 @@
   --color-primary-dark: #510400; /* Darker Maroon for contrast/buttons */
   --color-cream: #FFF8E7; /* Light Cream */
   --color-white: #FFFFFF;
-  --color-light-grey: #E8E8E8; /* Light Grey – footnotes, formula, disclaimers */
+  --color-light-grey: #E8E8E8; /* Light Grey â€“ footnotes, formula, disclaimers */
   --color-secondary-light: #924444; /* Light Maroon - Vanco section titles */
   --color-vanco-card: #f5f5f5; /* Lighter grey for inner cards */
   --color-red-placeholder: #C62828; /* Red for TDM placeholders */
@@ -593,7 +593,7 @@ h3 {
 .card.note-card h3 {
     font-size: 1rem; 
     font-weight: 600;
-    text-align: center;
+    text-align: left;
 }
 
 /* Style to make the body content smaller inside the Disclaimer Card */
@@ -650,6 +650,32 @@ h3 {
     color: #000000;
 }
 
+/* --- Mobile Responsive Adjustments --- */
+@media screen and (max-width: 768px) {
+  .calc-selection-card {
+    padding: 15px 20px; /* Reduced from 30px 30px */
+    margin: 12px auto; /* Reduced from 20px auto */
+  }
+  
+  .card-title {
+    font-size: 1.1rem; /* Reduced from 1.35rem */
+    line-height: 1.2;
+  }
+  
+  .card-subtitle {
+    font-size: 0.85rem; /* Reduced from 1rem */
+    margin-top: 3px; /* Reduced from 5px */
+  }
+  
+  .page-title-block {
+    padding: 5px 20px 15px; /* Reduced vertical padding */
+  }
+  
+  .page-title-block h1 {
+    font-size: 1.4rem; /* Reduced from 1.75rem */
+  }
+}
+
 /* --- Output and Content Hierarchy Styling --- */
 
 /* 1. PRIMARY OUTPUT CONTENT (Summary of Inputs List, Dose/Frequency text) */
@@ -693,4 +719,254 @@ h3 {
 
 
 
+
+
+/* ========================================
+   MODERN ENHANCEMENTS - Added Nov 2025
+   ======================================== */
+
+/* Smooth scrolling for better UX */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Improved card shadows with subtle depth */
+.card {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  transition: box-shadow 0.3s ease;
+}
+
+.card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+}
+
+/* Modern output boxes with better contrast */
+.output-box {
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+  transition: all 0.3s ease;
+}
+
+/* Improved button styles */
+.nav-button,
+.copy-button {
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.nav-button:hover,
+.copy-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.nav-button:active,
+.copy-button:active {
+  transform: translateY(0);
+}
+
+/* Better spacing for main sections */
+.container > .page {
+  padding: 20px 25px;
+}
+
+/* Modern table styling */
+.dose-table {
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+}
+
+.dose-table th {
+  letter-spacing: 0.5px;
+  font-weight: 600;
+}
+
+.dose-table td {
+  transition: background-color 0.2s ease;
+}
+
+.dose-table tr:hover td {
+  background-color: #fef5e7;
+}
+
+/* Improved form inputs */
+.form-group input[type="number"],
+.form-group select {
+  transition: all 0.2s ease;
+  border: 1.5px solid #ddd;
+}
+
+.form-group input[type="number"]:focus,
+.form-group select:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(128, 0, 0, 0.1);
+}
+
+/* Smooth transitions for collapsible sections */
+.collapsible-content {
+  transition: all 0.3s ease;
+}
+
+/* Better footnote styling */
+.input-footnote {
+  line-height: 1.5;
+}
+
+/* Enhanced note cards */
+.note-card {
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+  transition: all 0.2s ease;
+}
+
+/* Modern dropdown menu */
+.dropdown-menu {
+  animation: slideDown 0.2s ease;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Responsive improvements */
+@media screen and (max-width: 768px) {
+  .container {
+    padding: 15px;
+  }
+  
+  .header {
+    padding: 15px;
+  }
+  
+  .header-title {
+    font-size: 1.1rem;
+  }
+  
+  .nav-buttons {
+    gap: 8px;
+  }
+  
+  .nav-button {
+    padding: 6px 12px;
+    font-size: 0.85rem;
+  }
+  
+  /* Better mobile spacing */
+  h3 {
+    font-size: 1.1rem;
+    margin-top: 20px;
+  }
+  
+  .card {
+    padding: 15px;
+  }
+  
+  /* Ensure Step 4.2 stacks nicely on mobile */
+  .output-box {
+    min-width: 100% !important;
+  }
+}
+
+/* Print-friendly styles */
+@media print {
+  .header,
+  .nav-buttons,
+  .dropdown-menu,
+  .copy-button {
+    display: none;
+  }
+  
+  .container {
+    max-width: 100%;
+  }
+  
+  .card,
+  .output-box {
+    box-shadow: none;
+    border: 1px solid #ddd;
+  }
+  
+  .page {
+    page-break-inside: avoid;
+  }
+}
+
+/* Accessibility improvements */
+.nav-button:focus,
+.copy-button:focus,
+input:focus,
+select:focus {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+/* Loading animation for dynamic content */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+#vancomycinOutput {
+  animation: fadeIn 0.3s ease;
+}
+
+/* Better visual hierarchy for headers */
+h3 {
+  position: relative;
+  padding-left: 10px;
+}
+
+h3::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 4px;
+  height: 60%;
+  background-color: var(--color-primary);
+  border-radius: 2px;
+}
+
+/* Improved warning card styling */
+.warning-card {
+  border-left: 4px solid #ffc107;
+  box-shadow: 0 2px 6px rgba(255, 193, 7, 0.15);
+  animation: fadeIn 0.3s ease;
+}
+
+/* Better clinical note styling */
+.clinical-note-card {
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+}
+
+/* Enhanced calc result boxes */
+.calc-result-box {
+  animation: fadeIn 0.3s ease;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+}
+
+/* Modern footer */
+.footer {
+  box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.06);
+}
+
+/* Improved tooltip */
+.copy-button .tooltip-text {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  border-radius: 8px;
+}
 
