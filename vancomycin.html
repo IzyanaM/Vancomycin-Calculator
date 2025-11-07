@@ -68,7 +68,7 @@
 
           <div id="crclGroup" class="form-group" style="display:none;">
             <div class="form-group">
-                <label for="scr_input">Serum Creatinine (µmol/L):</label>
+                <label for="scr_input">Serum Creatinine (μmol/L):</label>
                 <input type="number" id="scr_input" step="1" placeholder="e.g., 85">
             </div>
             <label for="crcl">Creatinine Clearance (CrCl) (ml/min):</label>
@@ -119,7 +119,7 @@
 <br>
         <h3>STEP 1: Loading Dose (LD)</h3>
         <div id="ldOutput" class="card"></div>
-        <div id="mdFootnote" class="note-card" style="display:none;">
+        <div class="note-card">
           💡 <strong>Notes:</strong>
           <ul>
             <li>Loading Dose – To be given to ALL patients regardless of renal function.</li>
@@ -130,8 +130,15 @@
 <br>
         <h3>STEP 2: Maintenance Dose (MD) & Frequency</h3>
         <div id="mdOutput" class="card"></div>
-        <div id="mdFootnoteContainer"></div>
-<br>
+        <div class="note-card">
+          💡 <strong>Notes:</strong>
+          <ul>
+            <li>Subsequent maintenance doses will be based on TDM level (Refer to Step 4 for TDM sampling).</li>
+            <li>While waiting for the TDM result, continue serving the Vancomycin unless the patient has severe AKI or poor urine output.</li>
+            <li>Max Vancomycin dose: 2 g/DOSE or 4 g/DAY.</li>
+            <li id="crcl60SpecialNote" style="display:none;">*May consider conservative dosing for patients at risk for Acute Kidney Injury (AKI) (e.g., elderly, concurrent nephrotoxic drugs) – refer ID if in doubt.</li>
+          </ul>
+        </div>
 <br>
         <h3>STEP 3: Administration (Dilution & Infusion Rate)</h3>
         <div id="adminOutput" class="card">
@@ -155,14 +162,14 @@
             
             <div class="card" style="background-color: var(--color-white); margin-bottom: 15px;">
               <div class="warning-title">
-                <span class="icon">!</span> Vancomycin Infusion Reaction (VIR / â€œRed Man Syndromeâ€)
+                <span class="icon">!</span> Vancomycin Infusion Reaction (VIR / “Red Man Syndrome”)
               </div>
               <ul>
                 <li>VIR is a common infusion-related reaction, not an allergy.</li>
                 <li>Symptoms: Itching, flushing, and erythematous rash involving the face, neck, or upper trunk.</li>
                 <li>Management:</li>
                 <ul style="margin-left: 20px;">
-                  <li>Stop or slow the infusion rate â€” symptoms usually resolve.</li>
+                  <li>Stop or slow the infusion rate — symptoms usually resolve.</li>
                   <li>Antihistamines (e.g., chlorpheniramine or diphenhydramine) may help if symptoms persist.</li>
                   <li>For subsequent doses, infuse at &le; 10 mg/min to minimize recurrence.</li>
                 </ul>
@@ -195,7 +202,7 @@
   <div class="note-card">
     💡 <strong>General Advisory:</strong>
     <ul>
-      <li>If the sampling time falls after office hours (AOH), it is recommended to collect the sample the following morning on a working day.</li>
+      <li>If the sampling time falls after office hours (AOH), it is recommended to collect the sample the following morning.</li>
 <br>
     <strong>Documentation Reminder:</strong>
       <li>TDM results are meaningless unless:
@@ -205,7 +212,7 @@
         </ol>
       </li>
     </ul>
-    <p>Record all relevant details in the 📄  <a href="https://amshsgb.wixsite.com/my-site/_files/ugd/b064f1_41ed8df4c61f4c24a6bb2ebcff1cea7c.pdf" target="_blank">Vancomycin AUC Monitoring Form</a></p>
+    <p>Record all relevant details in the 📄 <a href="https://amshsgb.wixsite.com/my-site/_files/ugd/b064f1_41ed8df4c61f4c24a6bb2ebcff1cea7c.pdf" target="_blank">Vancomycin AUC Monitoring Form</a></p>
   </div>
 </div>
 <br>
@@ -267,7 +274,7 @@ Disclaimer! This note is intended as a template only - please review and adjust 
 
           <div class="copy-button-container">
             <button class="copy-button" onclick="copyClinicalNote()">
-                📋Copy to Notes
+                📋 Copy to Notes
                 <span class="tooltip-text">Copy this note to your clinical documentation.</span>
             </button>
           </div>
@@ -299,7 +306,7 @@ Disclaimer! This note is intended as a template only - please review and adjust 
       <li><strong>In collaboration with:</strong> Nur Farhana (TDM Pharmacy), PRIC & Medication Safety Team </li>
       <li><strong>Updated:</strong> January 2026</li>
       <li class="footer-critical-note"><strong>For Hospital Sungai Buloh Staff Use Only.</li>
-      <li><strong>Footnote:</strong> Developed for Hospital Sungai Buloh staff use only for educational and clinical support purposes. 
+      <li><strong>Footnote:</strong> Developed for Hospital Sungai Buloh staff use only — for educational and clinical support purposes. 
         This calculator may not cover all aspects of clinical practice; healthcare practitioners are encouraged to review 
         patient details and professionally assess the relevance of this guide to each clinical situation. 
         This guide is subject to periodic updates. We assume no responsibility for any party that referred to an outdated version.
