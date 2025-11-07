@@ -80,7 +80,7 @@ function getMaintenanceDose(weight, table) {
     
     const parts = mdData.dose.split(' ');
     const dose = parseFloat(parts[0].replace(',', ''));
-    const freqText = parts[2].replace('*', ''); // parts[2] is the frequency (OD, BD, TDS, QID)
+    const freqText = parts[2].replace('*', '');  // Fixed: parts[2] gets "OD", "BD", "TDS" correctly
     
     return { dose, doseText: parts[0], freqText, fullDoseText: mdData.dose, roundedDose: Math.round(dose / 250) * 250 };
 }
@@ -400,9 +400,14 @@ if (!hasScrolledVancomycin) {
     }
   }
 
-  let ldOutputHTML = '';
+  let ldOutputHTML = `<p><strong>${ldText}</strong></p>`;
     if (ldData) {
-        // --- TABLE FIRST ---
+        ldOutputHTML += `<p>Calculated loading dose (based on ABW ${abw} kg): <strong>${ldData.roundedDose.toLocaleString()} mg STAT</strong></p>`;
+        if (ldData.topUp !== undefined) {
+            ldOutputHTML += `<p class="bold-highlight">*Top-Up Dose (to be given 1 hour before HD ends): <strong>${ldData.topUp.toLocaleString()} mg</strong></p>`;
+        }
+        
+        // --- MODIFIED TABLE GENERATION START (Issue 1 Fix) ---
         if (ldTable) {
             // CRITICAL: Find the specific item based on ABW to get the correct weight bounds and Top-Up value
             const relevantItem = ldTable.find(item => abw <= item.maxWeight + 0.001);
@@ -415,7 +420,7 @@ if (!hasScrolledVancomycin) {
                 const startWeight = index === 0 ? '< 50' : (ldTable[index - 1].maxWeight + 0.1).toFixed(0); 
                 const endWeight = relevantItem.maxWeight === Infinity ? '≥ 100' : relevantItem.maxWeight.toFixed(0);
 
-                ldOutputHTML += `<h4>Dosing Table:</h4>`;
+                ldOutputHTML += `<br><h4>Dosing Table:</h4>`;
                 
                 // Add conditional Top-Up Dose header
                 ldOutputHTML += `<table class="dose-table">
@@ -432,35 +437,22 @@ if (!hasScrolledVancomycin) {
                 </table>`;
             }
         }
-        
-        // --- TEXT AS FOOTNOTE BELOW TABLE ---
-        ldOutputHTML += `<p class="input-footnote" style="margin-top: 15px;"><strong>${ldText}</strong></p>`;
-        ldOutputHTML += `<p class="input-footnote">Calculated loading dose (based on ABW ${abw} kg): <strong>${ldData.roundedDose.toLocaleString()} mg STAT</strong></p>`;
-        if (ldData.topUp !== undefined) {
-            ldOutputHTML += `<p class="input-footnote bold-highlight">*Top-Up Dose (to be given 1 hour before HD ends): <strong>${ldData.topUp.toLocaleString()} mg</strong></p>`;
-        }
+        // --- MODIFIED TABLE GENERATION END ---
     }
     if(document.getElementById('ldOutput')) document.getElementById('ldOutput').innerHTML = ldOutputHTML;
   
 
   // --- STEP 2: Maintenance Dose (MD) & Frequency Calculation ---
   if (document.getElementById('crcl60SpecialNote')) document.getElementById('crcl60SpecialNote').style.display = 'none';
-  
-  // Control Step 2 footnote - will be created dynamically only when needed
-  const mdFootnoteContainer = document.getElementById('mdFootnoteContainer');
-  if (mdFootnoteContainer) mdFootnoteContainer.innerHTML = ''; // Clear any existing footnote
-  
   let mdAdminRegimenText = 'Maintenance Dose not calculated.';
 
   if (abw < 40) {
     mdText = '<div class="warning-card">⚠️ Weight entered is below the validated range for adult patients. Please consult the Infectious Diseases (ID) or TDM Pharmacy team (Ext: 4124) for individualized dosing advice.</div>';
     mdData = null;
-    // No footnote for low weight
   } else if (status === 'HD' || (status === 'notHD' && crcl < 15)) {
     mdText = '<div class="warning-card">⚠️ The maintenance dose is based on Vancomycin TDM after the loading dose. Contact TDM Pharmacy for more information (Ext: 4124).</div>';
     mdData = null;
     mdAdminRegimenText = 'Maintenance dose dilution & administration not applicable. The maintenance dose is based on Vancomycin TDM after the loading dose. Contact TDM Pharmacy for more information (Ext: 4124).';
-    // No footnote for TDM-based dosing
   } else { // CrCl >= 15 and Not on HD
     if (crcl >= 15 && crcl <= 29) {
       mdTable = MD_CRCL_15_29; mdHeader = 'Maintenance dose: 7.5 mg/kg Q24H';
@@ -478,46 +470,9 @@ if (!hasScrolledVancomycin) {
             if (mdData) {
                 const mdAdmin = getAdminInstruction(mdData.roundedDose, ivAccess);
                 
-                // Create footnote dynamically for valid maintenance dose
-                if (mdFootnoteContainer) {
-                  const footnoteHTML = `
-                    <div class="note-card">
-                      💡 <strong>Notes:</strong>
-                      <ul>
-                        <li>Subsequent maintenance doses will be based on TDM level (Refer to Step 4 for TDM sampling).</li>
-                        <li>While waiting for the TDM result, continue serving the Vancomycin unless the patient has severe AKI or poor urine output.</li>
-                        <li>Max Vancomycin dose: 2 g/DOSE or 4 g/DAY.</li>
-                        <li id="crcl60SpecialNote" style="display:none;">*May consider conservative dosing for patients at risk for Acute Kidney Injury (AKI) (e.g., elderly, concurrent nephrotoxic drugs) – refer ID if in doubt.</li>
-                      </ul>
-                    </div>
-                  `;
-                  mdFootnoteContainer.innerHTML = footnoteHTML;
-                }
-                
                 // --- Build mdText for Step 2 output (MD & Frequency) ---
-                // TABLE FIRST
-                mdText = '';
-                
-                const relevantItem = mdTable.find(item => item.dose === mdData.fullDoseText); 
-
-                if (relevantItem) {
-                    const minWeight = relevantItem.minWeight.toFixed(0);
-                    const maxWeight = relevantItem.maxWeight === Infinity ? '&#8734;' : relevantItem.maxWeight.toFixed(0);
-                    
-                    mdText += `<h4>Dosing Table:</h4>`;
-                    
-                    mdText += `<table class="dose-table">
-                        <tr><th>Weight (kg)</th><th>Dose & Frequency</th></tr>
-                        <tr>
-                            <td class="weight-col">${minWeight}–${maxWeight.replace('.9', '').replace('.1', '')}</td>
-                            <td class="dose-col">${relevantItem.dose}</td>
-                        </tr>
-                    </table>`;
-                }
-                
-                // TEXT AS FOOTNOTE BELOW TABLE
-                mdText += `<p class="input-footnote" style="margin-top: 15px;"><strong>${mdHeader}</strong></p>`;
-                mdText += `<p class="input-footnote">Calculated maintenance dose & frequency (based on ABW ${abw} kg): <strong>${mdData.fullDoseText}</strong></p>`;
+                mdText = `<p><strong>${mdHeader}</strong></p>`;
+                mdText += `<p>Calculated maintenance dose & frequency (based on ABW ${abw} kg): <strong>${mdData.fullDoseText}</strong></p>`;
                 if (mdData.fullDoseText.includes('*')) {
                     if (document.getElementById('crcl60SpecialNote')) document.getElementById('crcl60SpecialNote').style.display = 'list-item';
                 }
@@ -529,6 +484,25 @@ if (!hasScrolledVancomycin) {
 mdAdminRegimenText = `${fullDoseTextClean}, dilute each dose in ${mdAdmin.dilution}, administer over ${mdAdmin.time} hour${mdAdmin.time !== 1 ? 's' : ''}.`;
                 } else {
                     mdAdminRegimenText = 'Maintenance Dose administration details unavailable.';
+                }
+
+
+                // --- CORRECTED TABLE GENERATION START ---
+                const relevantItem = mdTable.find(item => item.dose === mdData.fullDoseText); 
+
+                if (relevantItem) {
+                    const minWeight = relevantItem.minWeight.toFixed(0);
+                    const maxWeight = relevantItem.maxWeight === Infinity ? '&#8734;' : relevantItem.maxWeight.toFixed(0);
+                    
+                    mdText += `<br><h4>Dosing Table:</h4>`;
+                    
+                    mdText += `<table class="dose-table">
+                        <tr><th>Weight (kg)</th><th>Dose & Frequency</th></tr>
+                        <tr>
+                            <td class="weight-col">${minWeight}–${maxWeight.replace('.9', '').replace('.1', '')}</td>
+                            <td class="dose-col">${relevantItem.dose}</td>
+                        </tr>
+                    </table>`;
                 }
 
       } else {
@@ -595,16 +569,14 @@ mdAdminRegimenText = `${fullDoseTextClean}, dilute each dose in ${mdAdmin.diluti
     timingText = 'Take random TDM level in the morning, pre-HD.';
     doseReference = 'random TDM level in the morning, pre-HD';
   } else if (status === 'notHD' && crcl >= 15) {
-    // Get the frequency from the calculated maintenance dose
     const mdFrequency = mdData ? mdData.freqText.replace('*', '').trim() : '';
     
-    // Determine dose number based on frequency
-    let doseNum = '4th'; // Default to 4th for BD, TDS, QID
+    // Determine which dose to take TDM before
+    let doseNum = '4th'; // Default for BD, TDS, QID
     
     if (mdFrequency === 'OD') {
-      doseNum = '3rd';
+      doseNum = '3rd';  // OD frequency uses 3rd dose
     }
-    // BD, TDS, QID all use 4th dose (already set as default)
     
     timingText = `Take Pre-level (Trough) 30 min BEFORE the ${doseNum} Maintenance Dose.`;
     doseReference = `the ${doseNum} Maintenance Dose`;
@@ -618,9 +590,12 @@ mdAdminRegimenText = `${fullDoseTextClean}, dilute each dose in ${mdAdmin.diluti
   // 4.1. When to Take the First TDM Sample (appears for ALL indications)
   let section41HTML = `<p><strong>${timingText}</strong></p>`;
   
-  // Add MRSA footnote if applicable (MRSA + not on HD + CrCl >= 15)
-  if (isMRSA && status === 'notHD' && crcl >= 15) {
-    section41HTML += `<p class="input-footnote" style="margin-top: 10px;">For <b>MRSA</b> cases, refer step 4.2 for AUC sampling</p>`;
+  // Add note for MRSA patients about Step 4.2
+  if (isMRSA && status === 'notHD') {
+    section41HTML += `
+      <p style="margin-top: 10px; padding: 10px; background-color: #fff3cd; border-left: 4px solid #ffc107; border-radius: 4px; font-size: 0.9rem;">
+        <span style="font-weight: 700;">Note for MRSA infection:</span> Refer to <span style="font-weight: 700;">Step 4.2</span> below to determine if you need a post-dose (Peak) level.
+      </p>`;
   }
   
   if(document.getElementById('tdmTimingOutput')) {
@@ -636,46 +611,85 @@ mdAdminRegimenText = `${fullDoseTextClean}, dilute each dose in ${mdAdmin.diluti
 if (showSection42) {
     // MRSA + Not on HD: Show AUC vs Trough guidance with modern side-by-side layout
     section42HTML = `
-      <div style="display: flex; gap: 20px; margin-bottom: 15px; flex-wrap: wrap;">
+      <div style="display: flex; gap: 20px; flex-wrap: wrap; margin-bottom: 15px;">
         
-        <!-- Left: Stable Renal Function -->
-        <div class="output-box" style="flex: 1; min-width: 300px; border-left: 4px solid #28a745;">
-          <div style="display: flex; align-items: center; margin-bottom: 10px;">
-            <span style="font-size: 1.5rem; margin-right: 10px;">✅</span>
+        <!-- Left Card: Stable Renal Function (Green border) -->
+        <div style="flex: 1; min-width: 300px; background-color: #f8f9fa; border-left: 4px solid #28a745; border-radius: 8px; padding: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+          
+          <!-- Header with emoji and title -->
+          <div style="display: flex; align-items: flex-start; gap: 10px; margin-bottom: 15px;">
+            <span style="font-size: 1.5rem; line-height: 1;">✅</span>
             <div>
-              <strong style="display: block; font-size: 1.05rem;">Stable Renal Function</strong>
-              <span style="font-size: 0.85rem; color: #666;">(including stable CKD)</span>
+              <div style="font-weight: 700; font-size: 1.05rem; color: #000; line-height: 1.3;">
+                Stable Renal Function
+              </div>
+              <div style="color: #666; font-size: 0.9rem; margin-top: 2px;">
+                (including stable CKD)
+              </div>
             </div>
           </div>
-          <p style="color: #28a745; font-weight: 700; margin: 10px 0; font-size: 0.95rem;">Post-dose level required</p>
-          <p style="margin: 8px 0;"><strong>→ AUC-based monitoring</strong></p>
-          <p style="margin: 8px 0;">Take <b>TWO</b> samples:</p>
-          <ul style="margin: 5px 0 0 20px; padding: 0;">
-            <li style="margin: 5px 0;"><strong>Pre-dose (Trough):</strong> 30 min before ${doseReference}</li>
-            <li style="margin: 5px 0;"><strong>Post-dose (Peak):</strong> 1 hr after infusion ends</li>
+          
+          <!-- Post-dose requirement status -->
+          <div style="background-color: #d4edda; border: 1px solid #c3e6cb; border-radius: 5px; padding: 8px 12px; margin-bottom: 12px; color: #155724; font-weight: 600; font-size: 0.9rem;">
+            Post-dose level required
+          </div>
+          
+          <!-- Monitoring method -->
+          <div style="margin-bottom: 12px; font-size: 0.95rem;">
+            <strong>→ AUC-based monitoring</strong>
+          </div>
+          
+          <!-- Sampling instructions -->
+          <div style="font-size: 0.95rem; margin-bottom: 8px;">
+            Take <span style="font-weight: 700; color: #28a745;">TWO</span> samples:
+          </div>
+          
+          <ul style="margin-left: 20px; margin-top: 8px; margin-bottom: 0; font-size: 0.9rem; line-height: 1.6;">
+            <li><strong>Pre-dose (Trough):</strong> 30 min BEFORE ${doseReference}</li>
+            <li><strong>Post-dose (Peak):</strong> 1 hr AFTER complete infusion</li>
           </ul>
         </div>
         
-        <!-- Right: Unstable Renal Function -->
-        <div class="output-box" style="flex: 1; min-width: 300px; border-left: 4px solid #dc3545;">
-          <div style="display: flex; align-items: center; margin-bottom: 10px;">
-            <span style="font-size: 1.5rem; margin-right: 10px;">❌</span>
+        <!-- Right Card: Unstable Renal Function (Red border) -->
+        <div style="flex: 1; min-width: 300px; background-color: #f8f9fa; border-left: 4px solid #dc3545; border-radius: 8px; padding: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+          
+          <!-- Header with emoji and title -->
+          <div style="display: flex; align-items: flex-start; gap: 10px; margin-bottom: 15px;">
+            <span style="font-size: 1.5rem; line-height: 1;">❌</span>
             <div>
-              <strong style="display: block; font-size: 1.05rem;">Unstable Renal Function</strong>
-              <span style="font-size: 0.85rem; color: #666;">(e.g., AKI or HD)</span>
+              <div style="font-weight: 700; font-size: 1.05rem; color: #000; line-height: 1.3;">
+                Unstable Renal Function
+              </div>
+              <div style="color: #666; font-size: 0.9rem; margin-top: 2px;">
+                (e.g., AKI or HD)
+              </div>
             </div>
           </div>
-          <p style="color: #dc3545; font-weight: 700; margin: 10px 0; font-size: 0.95rem;">Post-dose level NOT required</p>
-          <p style="margin: 8px 0;"><strong>→ Trough-based monitoring</strong></p>
-          <p style="margin: 8px 0;">Take <b>ONE</b> sample:</p>
-          <ul style="margin: 5px 0 0 20px; padding: 0;">
-            <li style="margin: 5px 0;"><strong>Pre-dose (Trough):</strong> 30 min before ${doseReference}</li>
+          
+          <!-- Post-dose requirement status -->
+          <div style="background-color: #f8d7da; border: 1px solid #f5c6cb; border-radius: 5px; padding: 8px 12px; margin-bottom: 12px; color: #721c24; font-weight: 600; font-size: 0.9rem;">
+            Post-dose level NOT required
+          </div>
+          
+          <!-- Monitoring method -->
+          <div style="margin-bottom: 12px; font-size: 0.95rem;">
+            <strong>→ Trough-based monitoring</strong>
+          </div>
+          
+          <!-- Sampling instructions -->
+          <div style="font-size: 0.95rem; margin-bottom: 8px;">
+            Take <span style="font-weight: 700; color: #dc3545;">ONE</span> sample:
+          </div>
+          
+          <ul style="margin-left: 20px; margin-top: 8px; margin-bottom: 0; font-size: 0.9rem; line-height: 1.6;">
+            <li><strong>Pre-dose (Trough):</strong> 30 min BEFORE ${doseReference}</li>
           </ul>
         </div>
         
       </div>
       
-      <p style="font-style: italic; color: var(--color-primary); font-size: 0.9rem; margin-top: 5px; text-align: center;">
+      <!-- Centered footer note -->
+      <p style="text-align: center; font-style: italic; color: var(--color-primary); font-size: 0.9rem; margin-top: 15px; margin-bottom: 10px;">
         Please correlate clinically.
       </p>
     `;
@@ -717,7 +731,7 @@ if (showSection42) {
           <li><strong>Actual Body Weight:</strong> ${abw} kg</li>
           <li><strong>Dialysis Status:</strong> ${document.getElementById('dialysisStatus').options[document.getElementById('dialysisStatus').selectedIndex].text}</li>
           ${status === 'HD' ? `<li><strong>Vancomycin Timing:</strong> ${document.getElementById('dialysisTiming').options[document.getElementById('dialysisTiming').selectedIndex].text.replace('Vancomycin started or planned to be given ', '')}</li>` : ''}
-           ${status === 'notHD' ? `<li><strong>Serum Creatinine:</strong> ${scr_input} µmol/L</li>` : ''}
+           ${status === 'notHD' ? `<li><strong>Serum Creatinine:</strong> ${scr_input} μmol/L</li>` : ''}
           ${status === 'notHD' ? `<li><strong>Creatinine Clearance:</strong> ${crcl.toFixed(1)} ml/min</li>` : ''}
           <li><strong>Indication:</strong> ${document.getElementById('indication').options[document.getElementById('indication').selectedIndex].text}</li>
           <li><strong>IV Access:</strong> ${document.getElementById('ivAccess').options[document.getElementById('ivAccess').selectedIndex].text}</li>
@@ -825,7 +839,7 @@ function copyClinicalNote() {
     const userValue = input ? (input.value.trim() || input.placeholder) : '';
     
     // Replace the specific placeholder symbol \u25CF in the text content
-    return baseText.replace('\u25CF', userValue).replace('– Date & time:', 'Date/Time:').replace('.', '').trim();
+    return baseText.replace('\u25CF', userValue).replace('â€” Date & time:', 'Date/Time:').replace('.', '').trim();
   };
   
   const tdm1 = getTDMTextFromLiveDOM('noteTDM1');
@@ -851,7 +865,7 @@ function copyClinicalNote() {
   if (statusText.includes('Haemodialysis')) textToCopy += `• Vancomycin Timing: ${document.getElementById('dialysisTiming').options[document.getElementById('dialysisTiming').selectedIndex].text.replace('Vancomycin started or planned to be given ', '')}\n`;
   
   if (statusText === 'Not on Haemodialysis') {
-      textToCopy += `• Serum Creatinine (µmol/L): ${document.getElementById('scr_input').value}\n`;
+      textToCopy += `• Serum Creatinine (μmol/L): ${document.getElementById('scr_input').value}\n`;
       textToCopy += `• Creatinine Clearance: ${crclValue} ml/min\n`;
   }
   
@@ -891,7 +905,7 @@ function copyClinicalNote() {
   navigator.clipboard.write([clipboardItem]).then(() => {
     const button = document.querySelector('.copy-button');
     const originalText = button.innerHTML;
-    button.innerHTML = 'Copied!';
+    button.innerHTML = 'âœ… Copied!';
     setTimeout(() => {
       button.innerHTML = originalText;
     }, 1500);
