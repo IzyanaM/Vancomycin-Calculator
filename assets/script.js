@@ -384,7 +384,7 @@ if (!hasScrolledVancomycin) {
     if (timing === 'beforeHD') {
       ldTable = LD_HD_BEFORE;
       ldText = 'Loading Dose: 15–20 mg/kg IV STAT';
-      if (document.getElementById('ldFootnoteHD')) document.getElementById('ldFootnoteHD').style.display = 'block';
+      if (document.getElementById('ldFootnoteHD')) document.getElementById('ldFootnoteHD').style.display = 'list-item';
     } else if (timing === 'duringHD') {
       ldTable = LD_HD_DURING;
       ldText = 'Loading Dose: 25 mg/kg IV STAT (To be given 1 hour before HD ends.)';
@@ -400,14 +400,12 @@ if (!hasScrolledVancomycin) {
     }
   }
 
-  let ldOutputHTML = `<p><strong>${ldText}</strong></p>`;
+  let ldOutputHTML = '';
     if (ldData) {
-        ldOutputHTML += `<p>Calculated loading dose (based on ABW ${abw} kg): <strong>${ldData.roundedDose.toLocaleString()} mg STAT</strong></p>`;
-        if (ldData.topUp !== undefined) {
-            ldOutputHTML += `<p class="bold-highlight">*Top-Up Dose (to be given 1 hour before HD ends): <strong>${ldData.topUp.toLocaleString()} mg</strong></p>`;
-        }
+        // Add colored wrapper for visual consistency
+        ldOutputHTML = `<div style="background-color: #F8E8E8; border-left: 4px solid #800000; border-radius: 8px; padding: 20px; margin-bottom: 15px;">`;
         
-        // --- MODIFIED TABLE GENERATION START (Issue 1 Fix) ---
+        // --- TABLE FIRST (Primary Information) ---
         if (ldTable) {
             // CRITICAL: Find the specific item based on ABW to get the correct weight bounds and Top-Up value
             const relevantItem = ldTable.find(item => abw <= item.maxWeight + 0.001);
@@ -420,30 +418,35 @@ if (!hasScrolledVancomycin) {
                 const startWeight = index === 0 ? '< 50' : (ldTable[index - 1].maxWeight + 0.1).toFixed(0); 
                 const endWeight = relevantItem.maxWeight === Infinity ? '≥ 100' : relevantItem.maxWeight.toFixed(0);
 
-                ldOutputHTML += `<br><h4>Dosing Table:</h4>`;
-                
-                // Add conditional Top-Up Dose header
-                ldOutputHTML += `<table class="dose-table">
-                    <tr>
-                        <th>Weight (kg)</th>
-                        <th>Loading Dose (mg STAT)</th>
-                        ${isHDBefore ? '<th>Top-Up Dose (mg)</th>' : ''} 
-                    </tr>
-                    <tr>
-                        <td class="weight-col">${startWeight.includes('<') || startWeight.includes('≥') ? startWeight : `${startWeight}–${endWeight}`}</td>
-                        <td class="dose-col">${relevantItem.dose.toLocaleString()}</td>
-                        ${isHDBefore ? `<td class="dose-col">${relevantItem.topUp.toLocaleString()}</td>` : ''} 
-                    </tr>
-                </table>`;
+                // Card-style dosing display (matching Step 3 design)
+                ldOutputHTML += `
+                  <div style="background-color: white; border-radius: 5px; padding: 15px; margin-bottom: 12px;">
+                    <div style="margin-bottom: 10px;">
+                      <span style="color: #800000; font-weight: 600;">📊 Your Weight Range:</span>
+                      <span style="margin-left: 8px; font-size: 1.1rem; font-weight: 700;">${startWeight.includes('<') || startWeight.includes('≥') ? startWeight : `${startWeight}–${endWeight}`} kg</span>
+                    </div>
+                    <div style="margin-bottom: ${isHDBefore ? '8px' : '0'};">
+                      <span style="color: #800000; font-weight: 600;">💉 Loading Dose:</span>
+                      <span style="margin-left: 8px; font-size: 1.1rem; font-weight: 700;">${relevantItem.dose.toLocaleString()} mg STAT</span>
+                    </div>
+                    ${isHDBefore ? `<div>
+                      <span style="color: #800000; font-weight: 600;">➕ Top-Up Dose:</span>
+                      <span style="margin-left: 8px; font-size: 1.1rem; font-weight: 700;">${relevantItem.topUp.toLocaleString()} mg</span>
+                      <span style="color: #666; font-size: 0.85rem; margin-left: 5px;">(post-HD)</span>
+                    </div>` : ''}
+                  </div>`;
             }
         }
-        // --- MODIFIED TABLE GENERATION END ---
+        
+        // Top-up dose is already shown in the table, no footnote needed
+        
+        // Close colored wrapper
+        ldOutputHTML += `</div>`;
     }
     if(document.getElementById('ldOutput')) document.getElementById('ldOutput').innerHTML = ldOutputHTML;
   
 
   // --- STEP 2: Maintenance Dose (MD) & Frequency Calculation ---
-  if (document.getElementById('crcl60SpecialNote')) document.getElementById('crcl60SpecialNote').style.display = 'none';
   let mdAdminRegimenText = 'Maintenance Dose not calculated.';
 
   if (abw < 40) {
@@ -470,12 +473,37 @@ if (!hasScrolledVancomycin) {
             if (mdData) {
                 const mdAdmin = getAdminInstruction(mdData.roundedDose, ivAccess);
                 
-                // --- Build mdText for Step 2 output (MD & Frequency) ---
-                mdText = `<p><strong>${mdHeader}</strong></p>`;
-                mdText += `<p>Calculated maintenance dose & frequency (based on ABW ${abw} kg): <strong>${mdData.fullDoseText}</strong></p>`;
-                if (mdData.fullDoseText.includes('*')) {
-                    if (document.getElementById('crcl60SpecialNote')) document.getElementById('crcl60SpecialNote').style.display = 'list-item';
+                // --- TABLE FIRST (Primary Information) ---
+                const relevantItem = mdTable.find(item => item.dose === mdData.fullDoseText); 
+
+                if (relevantItem) {
+                    const minWeight = relevantItem.minWeight.toFixed(0);
+                    const maxWeight = relevantItem.maxWeight === Infinity ? '&#8734;' : relevantItem.maxWeight.toFixed(0);
+                    
+                    // Add colored wrapper with card-style design (matching Step 3)
+                    mdText = `<div style="background-color: #FFF8E7; border-left: 4px solid #D68910; border-radius: 8px; padding: 20px; margin-bottom: 15px;">`;
+                    
+                    // Card-style dosing display
+                    mdText += `
+                      <div style="background-color: white; border-radius: 5px; padding: 15px; margin-bottom: 12px;">
+                        <div style="margin-bottom: 10px;">
+                          <span style="color: #D68910; font-weight: 600;">📊 Your Weight Range:</span>
+                          <span style="margin-left: 8px; font-size: 1.1rem; font-weight: 700;">${minWeight}–${maxWeight.replace('.9', '').replace('.1', '')} kg</span>
+                        </div>
+                        <div>
+                          <span style="color: #D68910; font-weight: 600;">💉 Maintenance Dose:</span>
+                          <span style="margin-left: 8px; font-size: 1.1rem; font-weight: 700;">${relevantItem.dose}</span>
+                        </div>
+                      </div>`;
                 }
+                
+                // Add conservative dosing note if asterisk present
+                if (mdData.fullDoseText.includes('*')) {
+                    mdText += `<p class="input-footnote" style="margin-top: 12px; font-size: 0.9rem; color: #D68910;">*May consider conservative dosing for patients at risk for Acute Kidney Injury (AKI) (e.g., elderly, concurrent nephrotoxic drugs) – refer ID if in doubt.</p>`;
+                }
+                
+                // Close colored wrapper
+                mdText += `</div>`;
                 
                 // 2. *** BUILD NEW STRING FOR CLINICAL NOTE (mdAdminRegimenText) ***
                 if (mdAdmin) {
@@ -486,31 +514,35 @@ mdAdminRegimenText = `${fullDoseTextClean}, dilute each dose in ${mdAdmin.diluti
                     mdAdminRegimenText = 'Maintenance Dose administration details unavailable.';
                 }
 
-
-                // --- CORRECTED TABLE GENERATION START ---
-                const relevantItem = mdTable.find(item => item.dose === mdData.fullDoseText); 
-
-                if (relevantItem) {
-                    const minWeight = relevantItem.minWeight.toFixed(0);
-                    const maxWeight = relevantItem.maxWeight === Infinity ? '&#8734;' : relevantItem.maxWeight.toFixed(0);
-                    
-                    mdText += `<br><h4>Dosing Table:</h4>`;
-                    
-                    mdText += `<table class="dose-table">
-                        <tr><th>Weight (kg)</th><th>Dose & Frequency</th></tr>
-                        <tr>
-                            <td class="weight-col">${minWeight}–${maxWeight.replace('.9', '').replace('.1', '')}</td>
-                            <td class="dose-col">${relevantItem.dose}</td>
-                        </tr>
-                    </table>`;
-                }
-
       } else {
         mdText = '<div class="warning-card">⚠️ Could not determine maintenance dose for the provided weight range. Please consult TDM Pharmacy (Ext: 4124).</div>';
       }
     }
   }
   if(document.getElementById('mdOutput')) document.getElementById('mdOutput').innerHTML = mdText;
+
+  // Add footnote only when there's an actual dose (not warning messages)
+  const mdFootnoteDiv = document.getElementById('mdFootnote');
+  if (mdFootnoteDiv) {
+    if (mdData && !mdText.includes('warning-card')) {
+      // Show footnote (conservative dosing note now appears below table instead)
+      let footnoteHTML = `
+        <div class="note-card">
+          💡 <strong>Notes:</strong>
+          <ul>
+            <li>Subsequent maintenance doses will be based on TDM level (Refer to Step 4 for TDM sampling).</li>
+            <li>While waiting for the TDM result, continue serving the Vancomycin unless the patient has severe AKI or poor urine output.</li>
+            <li>Max Vancomycin dose: 2 g/DOSE or 4 g/DAY.</li>
+          </ul>
+        </div>`;
+      
+      mdFootnoteDiv.innerHTML = footnoteHTML;
+      mdFootnoteDiv.style.display = 'block';
+    } else {
+      // Hide footnote for warning messages
+      mdFootnoteDiv.style.display = 'none';
+    }
+  }
 
   
   // --- STEP 3: Administration (Dilution & Infusion Rate) ---
@@ -519,15 +551,29 @@ mdAdminRegimenText = `${fullDoseTextClean}, dilute each dose in ${mdAdmin.diluti
       const ldAdmin = getAdminInstruction(ldData.roundedDose, ivAccess);
       if (ldAdmin) {
           ldAdminOutputHTML = `
-              <p><strong>Dose: ${ldData.roundedDose.toLocaleString()} mg IV STAT</strong></p>
-              <div style="margin-bottom: 5px; margin-top: 10px; line-height: 1.4;">
-                  •&nbsp;Dilute in <strong>${ldAdmin.dilution}</strong>
-                  <br>
-                  •&nbsp;Administer over <strong>${ldAdmin.time} hour${ldAdmin.time > 1 ? 's' : ''}</strong>
-              </div>
-              <p class="input-footnote" style="margin-top: 5px; font-weight: normal;">
-                  Footnote: Maximum concentration for ${ivAccess} line: ${ldAdmin.maxConc}
-              </p>`;
+              <div style="background-color: #F8E8E8; border-left: 4px solid #800000; border-radius: 8px; padding: 15px; margin-bottom: 10px;">
+                <!-- Header with icon -->
+                <div style="display: flex; align-items: center; margin-bottom: 12px;">
+                  
+                  <strong style="color: #800000; font-size: 1.05rem;">Loading Dose: ${ldData.roundedDose.toLocaleString()} mg IV STAT</strong>
+                </div>
+                
+                <!-- Dilution and administration details -->
+                <div style="background-color: white; border-radius: 5px; padding: 12px; margin-bottom: 10px;">
+                  <div style="margin-bottom: 8px;">
+                    <span style="color: #800000; font-weight: 600;">📋 Dilution:</span>
+                    <span style="margin-left: 8px;">${ldAdmin.dilution}</span>
+                  </div>
+                  <div style="margin-bottom: 8px;">
+                    <span style="color: #800000; font-weight: 600;">⏱️ Infusion Time:</span>
+                    <span style="margin-left: 8px;">${ldAdmin.time} hour${ldAdmin.time > 1 ? 's' : ''}</span>
+                  </div>
+                  <div>
+                    <span style="color: #800000; font-weight: 600;">⚕️ Max Concentration:</span>
+                    <span style="margin-left: 8px;">${ldAdmin.maxConc} (${ivAccess} line)</span>
+                  </div>
+                </div>
+              </div>`;
       }
   }
   if(document.getElementById('ldAdminOutput')) document.getElementById('ldAdminOutput').innerHTML = ldAdminOutputHTML;
@@ -540,14 +586,29 @@ mdAdminRegimenText = `${fullDoseTextClean}, dilute each dose in ${mdAdmin.diluti
         const time = mdAdmin.time; 
 
         mdAdminOutputHTML = `
-        <p><strong>Dose: ${fullDoseText}</strong></p>
-        <div style="margin-bottom: 5px; margin-top: 10px; line-height: 1.4;">
-        •&nbsp;Dilute each dose in <strong>${mdAdmin.dilution}</strong><br> 
-        •&nbsp;Administer over <strong>${time} hour${time !== 1 ? 's' : ''}</strong>
-        </div>
-        <p class="input-footnote" style="margin-top: 5px; font-weight: normal;">
-        Footnote: Maximum concentration for ${ivAccess} line: ${mdAdmin.maxConc}
-        </p>`;
+              <div style="background-color: #FFF8E7; border-left: 4px solid #D68910; border-radius: 8px; padding: 15px; margin-bottom: 10px;">
+                <!-- Header with icon -->
+                <div style="display: flex; align-items: center; margin-bottom: 12px;">
+                  
+                  <strong style="color: #D68910; font-size: 1.05rem;">Maintenance Dose: ${fullDoseText}</strong>
+                </div>
+                
+                <!-- Dilution and administration details -->
+                <div style="background-color: white; border-radius: 5px; padding: 12px; margin-bottom: 10px;">
+                  <div style="margin-bottom: 8px;">
+                    <span style="color: #D68910; font-weight: 600;">📋 Dilution:</span>
+                    <span style="margin-left: 8px;">${mdAdmin.dilution} per dose</span>
+                  </div>
+                  <div style="margin-bottom: 8px;">
+                    <span style="color: #D68910; font-weight: 600;">⏱️ Infusion Time:</span>
+                    <span style="margin-left: 8px;">${time} hour${time !== 1 ? 's' : ''} per dose</span>
+                  </div>
+                  <div>
+                    <span style="color: #D68910; font-weight: 600;">⚕️ Max Concentration:</span>
+                    <span style="margin-left: 8px;">${mdAdmin.maxConc} (${ivAccess} line)</span>
+                  </div>
+                </div>
+              </div>`;
       }
 
   } else {
@@ -725,7 +786,7 @@ if (showSection42) {
   // Update Clinical Note TDM placeholders
   if(document.getElementById('noteTDM1')) document.getElementById('noteTDM1').innerHTML = noteTDM1_val;
   if(document.getElementById('noteTDM2')) document.getElementById('noteTDM2').innerHTML = noteTDM2_val;  
-  // --- Sub-Output: Summary of Inputs ---
+  // --- Sub-Output: Summary of Inputs (original, full indication text) ---
   const summaryHTML = `
       <ul>
           <li><strong>Actual Body Weight:</strong> ${abw} kg</li>
@@ -738,8 +799,18 @@ if (showSection42) {
       </ul>`;
   if(document.getElementById('summaryOutput')) document.getElementById('summaryOutput').innerHTML = summaryHTML;
 
-  // --- 6.0 Clinical Note Section (Auto-Generated) ---
-  if(document.getElementById('noteSummaryList')) document.getElementById('noteSummaryList').innerHTML = summaryHTML;
+  // --- 6.0 Clinical Note Section (editable indication for clinical note only) ---
+  const clinicalNoteSummaryHTML = `
+      <ul>
+          <li><strong>Actual Body Weight:</strong> ${abw} kg</li>
+          <li><strong>Dialysis Status:</strong> ${document.getElementById('dialysisStatus').options[document.getElementById('dialysisStatus').selectedIndex].text}</li>
+          ${status === 'HD' ? `<li><strong>Vancomycin Timing:</strong> ${document.getElementById('dialysisTiming').options[document.getElementById('dialysisTiming').selectedIndex].text.replace('Vancomycin started or planned to be given ', '')}</li>` : ''}
+           ${status === 'notHD' ? `<li><strong>Serum Creatinine:</strong> ${scr_input} μmol/L</li>` : ''}
+          ${status === 'notHD' ? `<li><strong>Creatinine Clearance:</strong> ${crcl.toFixed(1)} ml/min</li>` : ''}
+          <li><strong>Indication:</strong> ${document.getElementById('indication').options[document.getElementById('indication').selectedIndex].text.split('(')[0].trim()} <input type="text" placeholder="(please specify)" style="border: none; border-bottom: 2px solid #D68910; background: transparent; width: 200px; padding: 2px 4px; font-family: Arial, sans-serif; font-size: 13px;"></li>
+          <li><strong>IV Access:</strong> ${document.getElementById('ivAccess').options[document.getElementById('ivAccess').selectedIndex].text}</li>
+      </ul>`;
+  if(document.getElementById('noteSummaryList')) document.getElementById('noteSummaryList').innerHTML = clinicalNoteSummaryHTML;
   if(document.getElementById('noteLDRegimen')) document.getElementById('noteLDRegimen').textContent = ldAdminRegimenText.replace('IV STAT', 'IV STAT');
   if(document.getElementById('noteMDRegimen')) document.getElementById('noteMDRegimen').textContent = mdAdminRegimenText.replace('IV Q', 'IV q');
 }
@@ -799,8 +870,26 @@ function copyClinicalNote() {
       replaceInputWithValue(liveTDMInput2, clonedTDMInput2);
   }
 
+  // --- Fix Indication Input (in Patient Summary) ---
+  const summaryList = tempDiv.querySelector('#noteSummaryList');
+  if (summaryList) {
+      const indicationInput = summaryList.querySelector('input');
+      if (indicationInput) {
+          const liveIndicationInput = document.getElementById('noteSummaryList').querySelector('input');
+          if (liveIndicationInput) {
+              replaceInputWithValue(liveIndicationInput, indicationInput);
+          }
+      }
+  }
 
-  // 3. Apply styles (as before)
+  // 3. Apply styles and add spacing for copy-paste
+  tempDiv.setAttribute('style', 'font-family: Arial, Helvetica, sans-serif; font-size: 13px;');
+  
+  // Add spacing between major sections by adding margin-bottom to divs
+  tempDiv.querySelectorAll('div[style*="margin-bottom: 24px"]').forEach(div => {
+      const currentStyle = div.getAttribute('style');
+      div.setAttribute('style', currentStyle + ' margin-bottom: 30px !important;');
+  });
   tempDiv.setAttribute('style', bodyInlineStyle);
   tempDiv.querySelectorAll('.card-title').forEach(titleElement => {
       titleElement.setAttribute('style', titleInlineStyle);
@@ -905,7 +994,7 @@ function copyClinicalNote() {
   navigator.clipboard.write([clipboardItem]).then(() => {
     const button = document.querySelector('.copy-button');
     const originalText = button.innerHTML;
-    button.innerHTML = 'âœ… Copied!';
+    button.innerHTML = '✅ Copied!';
     setTimeout(() => {
       button.innerHTML = originalText;
     }, 1500);
