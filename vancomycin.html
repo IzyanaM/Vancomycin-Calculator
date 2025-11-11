@@ -130,15 +130,7 @@
 <br>
         <h3>STEP 2: Maintenance Dose (MD) & Frequency</h3>
         <div id="mdOutput" class="card"></div>
-        <div class="note-card">
-          💡 <strong>Notes:</strong>
-          <ul>
-            <li>Subsequent maintenance doses will be based on TDM level (Refer to Step 4 for TDM sampling).</li>
-            <li>While waiting for the TDM result, continue serving the Vancomycin unless the patient has severe AKI or poor urine output.</li>
-            <li>Max Vancomycin dose: 2 g/DOSE or 4 g/DAY.</li>
-            <li id="crcl60SpecialNote" style="display:none;">*May consider conservative dosing for patients at risk for Acute Kidney Injury (AKI) (e.g., elderly, concurrent nephrotoxic drugs) – refer ID if in doubt.</li>
-          </ul>
-        </div>
+        <div id="mdFootnote" style="display:none;"></div>
 <br>
         <h3>STEP 3: Administration (Dilution & Infusion Rate)</h3>
         <div id="adminOutput" class="card">
@@ -234,41 +226,86 @@ Disclaimer! This note is intended as a template only - please review and adjust 
         <div id="clinicalNoteContainer" class="card clinical-note-card">
           <div id="clinicalNoteContent">
             
-            <p style="font-weight: 700; color: #000000; margin-bottom: 10px; font-size: 14px; font-family: Arial, sans-serif;">
-                <strong>VANCOMYCIN THERAPY RECOMMENDATION</strong>
-            </p>
+            <!-- Header with better spacing -->
+            <div style="background-color: #800000; padding: 12px 15px; margin: -20px -20px 20px -20px; border-radius: 8px 8px 0 0;">
+              <p style="font-weight: 700; margin: 0; font-size: 15px; font-family: Arial, sans-serif; letter-spacing: 0.8px; color: #FFFFFF !important;">
+                  VANCOMYCIN THERAPY RECOMMENDATION
+              </p>
+            </div>
             
-            <p style="margin-bottom: 15px; font-weight: 400; color: #000000;">
-                Received query from Dr <input type="text" id="dr_input" value="" placeholder="Name" style="border: none; border-bottom: 1px solid #000; width: 150px; padding: 2px 0; font-family: Arial, sans-serif; font-size: 13px;"> regarding IV Vancomycin initiation for this patient.
-            </p>
+            <!-- Introduction with better formatting -->
+            <div style="margin-bottom: 24px; padding: 12px; background-color: #FFF9E6; border-left: 4px solid #FFA726; border-radius: 4px;">
+              <p style="margin: 0; font-weight: 400; color: #000000; line-height: 1.6; font-size: 13px;">
+                  Received query from <strong>Dr <input type="text" id="dr_input" value="" placeholder="Name" style="border: none; border-bottom: 2px solid #FF6F00; background: transparent; width: 150px; padding: 2px 4px; font-family: Arial, sans-serif; font-size: 13px; font-weight: 600;"></strong> regarding IV Vancomycin initiation for this patient.
+              </p>
+            </div>
             
-            <div class="card-title"><strong>Patient Summary (as provided by the primary care team)</div>
-            <ul id="noteSummaryList"></ul>
+            <!-- Patient Summary Section with improved design -->
+            <div style="margin-bottom: 24px;">
+              <div style="font-weight: 700; color: #1565C0; font-size: 14px; margin-bottom: 10px; font-family: Arial, sans-serif; padding-bottom: 6px; border-bottom: 2px solid #1565C0;">
+                📋 PATIENT SUMMARY
+              </div>
+              <div style="background-color: #F0F7FF; padding: 16px; border-radius: 6px; border-left: 4px solid #1565C0;">
+                <ul id="noteSummaryList" style="margin: 0 0 8px 0; padding-left: 0; list-style-position: inside; line-height: 2.0; font-size: 13px; color: #333; font-family: Arial, sans-serif;"></ul>
+              </div>
+            </div>
 
-            <hr style="margin: 5px 0;">
+            <!-- Recommended Regimen Section with clear separation -->
+            <div style="margin-bottom: 24px;">
+              <div style="font-weight: 700; color: #FF6F00; font-size: 14px; margin-bottom: 10px; font-family: Arial, sans-serif; padding-bottom: 6px; border-bottom: 2px solid #FF6F00;">
+                💉 RECOMMENDED REGIMEN
+              </div>
+              <div style="background-color: #FFF8F0; padding: 16px; border-radius: 6px; border-left: 4px solid #FF6F00;">
+                <div style="margin-bottom: 14px; padding-bottom: 14px; border-bottom: 1px dashed #FFE0B2;">
+                  <p style="margin: 0 0 6px 0; font-weight: 800; color: #E65100; font-size: 14px;">
+                    <strong>🔸 Loading Dose</strong>
+                  </p>
+                  <p id="noteLDRegimen" style="margin: 0; line-height: 1.7; font-size: 13px; color: #333; padding-left: 20px;"></p>
+                </div>
+                <div>
+                  <p style="margin: 0 0 6px 0; font-weight: 800; color: #0D47A1; font-size: 14px;">
+                    <strong>🔸 Maintenance Dose</strong>
+                  </p>
+                  <p id="noteMDRegimen" style="margin: 0; line-height: 1.7; font-size: 13px; color: #333; padding-left: 20px;"></p>
+                </div>
+              </div>
+            </div>
 
-            <div class="card-title"><strong>Recommended Regimen based on Hosp Sg Buloh Vancomycin Protocol</div>
-<p class="bold-highlight"><strong>Loading Dose:</strong> <span id="noteLDRegimen"></span></p>
-<p class="bold-highlight"><strong>Maintenance Dose:</strong> <span id="noteMDRegimen"></span></p>
-            <hr style="margin: 5px 0;">
+            <!-- TDM Section with enhanced readability -->
+            <div style="margin-bottom: 24px;">
+              <div style="font-weight: 700; color: #00897B; font-size: 14px; margin-bottom: 10px; font-family: Arial, sans-serif; padding-bottom: 6px; border-bottom: 2px solid #00897B;">
+                🩺 THERAPEUTIC DRUG MONITORING (TDM)
+              </div>
+              <div style="background-color: #E8F5E9; padding: 16px; border-radius: 6px; border-left: 4px solid #00897B;">
+                <div style="margin-bottom: 14px; padding: 10px; background-color: white; border-radius: 4px; border: 1px solid #C8E6C9;">
+                  <p id="noteTDM1" style="margin: 0 0 8px 0; line-height: 1.7; font-size: 13px; font-weight: 600; color: #1B5E20;">TDM instructions not generated.</p>
+                  <p id="noteTDM2" style="margin: 0; line-height: 1.7; font-size: 13px; font-weight: 600; color: #1B5E20;"></p>
+                </div>
+                
+                <div style="font-size: 12px; color: #555; line-height: 1.8; margin-top: 12px;">
+                  <p style="margin: 0 0 6px 0;">
+                    <strong style="color: #00695C;">Important:</strong>
+                  </p>
+                  <p style="margin: 0 0 6px 0; padding-left: 12px;">• TDM blood sample should be obtained via venipuncture whenever possible, from the arm opposite to drug administration.</p>
+                  <p style="margin: 0; padding-left: 12px;">• Do not collect TDM samples from central lines (e.g. PICC, CVC, or other central venous catheters).</p>
+                </div>
+              </div>
+            </div>
 
-            <div class="card-title"><strong>Therapeutic Drug Monitoring (TDM)</div>
-            <p id="noteTDM1">TDM instructions not generated.</p>
-            <p id="noteTDM2"></p>
-
-            <ul>
-              <li><strong>TDM </strong>blood sample should be obtained via venipuncture whenever possible, from the arm opposite to the drug administration.</li>
-              <li>Do not collect TDM samples from central lines (e.g. PICC, CVC, or other central venous catheters).</li>
-</ul>
-            <hr style="margin: 5px 0;">
-
-            <div class="card-title"><strong>Remarks</div>
-            <ul>
-              <li>Monitor renal profile (RP) and urine output regularly.</li>
-              <li>Ensure the patient remains well hydrated while on Vancomycin.</li>
-              <li>Avoid concomitant nephrotoxic agents where possible.</li>
-              <li>Infusion rate must not exceed 10 mg/min to minimize infusion-related reactions.</li>
-            </ul>
+            <!-- Remarks Section with professional styling -->
+            <div style="margin-bottom: 0;">
+              <div style="font-weight: 700; color: #D32F2F; font-size: 14px; margin-bottom: 10px; font-family: Arial, sans-serif; padding-bottom: 6px; border-bottom: 2px solid #D32F2F;">
+                ⚠️ REMARKS
+              </div>
+              <div style="background-color: #FFEBEE; padding: 16px; border-radius: 6px; border-left: 4px solid #D32F2F;">
+                <ul style="margin: 0 0 8px 0; padding-left: 0; list-style-position: inside; line-height: 2.0; font-size: 13px; color: #333; font-family: Arial, sans-serif;">
+                  <li>Monitor renal profile (RP) and urine output regularly.</li>
+                  <li>Ensure the patient remains well hydrated while on Vancomycin.</li>
+                  <li>Avoid concomitant nephrotoxic agents where possible.</li>
+                  <li>Infusion rate must not exceed 10 mg/min to minimize infusion-related reactions.</li>
+                </ul>
+              </div>
+            </div>
 
           </div>
 
@@ -283,17 +320,8 @@ Disclaimer! This note is intended as a template only - please review and adjust 
         <div class="card note-card">
           <h3>Vancomycin Calculator Disclaimer</h3>
           <ul>
-            <li>Recommendation is based on Hospital Sungai Buloh Vancomycin Protocol.<br>🔗 <a href="https://amshsgb.wixsite.com/my-site/_files/ugd/b064f1_9106727a6d0748b2a4a9d448af16208a.pdf" target="_blank">Refer to Hosp Sungai Buloh Vancomycin Protocol</a></li>
-<br>
-            <li><strong>APPLICATION OF THIS PROTOCOL:</strong> Applicable to intravenous Vancomycin for the treatment of selective gram-positive organisms including but not limited to:
-              <ol>
-                <li>Methicillin-resistant Staphylococci (e.g. MRSA / MRCONS)</li>
-                <li>Enterococci (e.g. Enterococcus faecium)</li>
-                <li>Rhodococci (e.g. Rhodococcus hoagii)</li>
-              </ol>
-            </li>
-<br>
-            <li><strong>This protocol is NOT applicable to the treatment of Clostridioides difficile infection (CDI) using oral Vancomycin.</strong></li>
+            <li>Recommendation is based on Hospital Sungai Buloh Vancomycin Protocol. 🔗 <a href="https://amshsgb.wixsite.com/my-site/_files/ugd/b064f1_9106727a6d0748b2a4a9d448af16208a.pdf" target="_blank">Refer to Hosp Sungai Buloh Vancomycin Protocol</a>.</li>
+            <li>Clinical correlation is required.</li>
             <li>If in any doubt, call TDM Pharmacy (Ext: 4124) or refer to Infectious Disease (ID).</li>
             <li>Referral to ID or AMS Team is strongly recommended for all MRSA or Vancomycin cases.</li>
           </ul>
