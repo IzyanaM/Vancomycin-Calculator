@@ -481,7 +481,7 @@ if (!hasScrolledVancomycin) {
                     const maxWeight = relevantItem.maxWeight === Infinity ? '&#8734;' : relevantItem.maxWeight.toFixed(0);
                     
                     // Add colored wrapper with card-style design (matching Step 3)
-                    mdText = `<div style="background-color: #FFF8E7; border-left: 4px solid #D68910; border-radius: 8px; padding: 20px; margin-bottom: 15px;">`;
+                    mdText = `<div style="background-color: #FFF4D6; border-left: 4px solid #D68910; border-radius: 8px; padding: 20px; margin-bottom: 15px;">`;
                     
                     // Card-style dosing display
                     mdText += `
@@ -586,7 +586,7 @@ mdAdminRegimenText = `${fullDoseTextClean}, dilute each dose in ${mdAdmin.diluti
         const time = mdAdmin.time; 
 
         mdAdminOutputHTML = `
-              <div style="background-color: #FFF8E7; border-left: 4px solid #D68910; border-radius: 8px; padding: 15px; margin-bottom: 10px;">
+              <div style="background-color: #FFF4D6; border-left: 4px solid #D68910; border-radius: 8px; padding: 15px; margin-bottom: 10px;">
                 <!-- Header with icon -->
                 <div style="display: flex; align-items: center; margin-bottom: 12px;">
                   
@@ -756,8 +756,8 @@ if (showSection42) {
     `;
     
     // For clinical note
-    noteTDM1_val = timingText.replace('30 min BEFORE the', '30 min before the').replace('random TDM level', 'TDM level').replace('.', '') + ` - Date & time: <input type="text" value="" placeholder="\u25CF">`;
-    noteTDM2_val = `Take Post-level (Peak) 1 hour after completion of infusion - Date & time: <input type="text" value="" placeholder="\u25CF">`;
+    noteTDM1_val = timingText.replace('30 min BEFORE the', '30 min before the').replace('random TDM level', 'TDM level').replace('.', '') + ` - Date & time: <input type="text" id="tdm1DateTime" value="" placeholder="[enter date/time]">`;
+    noteTDM2_val = `Take Post-level (Peak) 1 hour after completion of infusion - Date & time: <input type="text" id="tdm2DateTime" value="" placeholder="[enter date/time]">`;
 
 
   } else {
@@ -765,7 +765,7 @@ if (showSection42) {
     section42HTML = ''; 
     
     // For clinical note
-    noteTDM1_val = timingText.replace('30 min BEFORE the', '30 min before the').replace('random TDM level', 'TDM level').replace('.', '') + ` - Date & time: <input type="text" value="" placeholder="\u25CF">`;
+    noteTDM1_val = timingText.replace('30 min BEFORE the', '30 min before the').replace('random TDM level', 'TDM level').replace('.', '') + ` - Date & time: <input type="text" id="tdm1DateTime" value="" placeholder="[enter date/time]">`;
     noteTDM2_val = '';
   }
 
@@ -807,7 +807,7 @@ if (showSection42) {
           ${status === 'HD' ? `<li><strong>Vancomycin Timing:</strong> ${document.getElementById('dialysisTiming').options[document.getElementById('dialysisTiming').selectedIndex].text.replace('Vancomycin started or planned to be given ', '')}</li>` : ''}
            ${status === 'notHD' ? `<li><strong>Serum Creatinine:</strong> ${scr_input} μmol/L</li>` : ''}
           ${status === 'notHD' ? `<li><strong>Creatinine Clearance:</strong> ${crcl.toFixed(1)} ml/min</li>` : ''}
-          <li><strong>Indication:</strong> ${document.getElementById('indication').options[document.getElementById('indication').selectedIndex].text.split('(')[0].trim()} <input type="text" placeholder="(please specify)" style="border: none; border-bottom: 2px solid #D68910; background: transparent; width: 200px; padding: 2px 4px; font-family: Arial, sans-serif; font-size: 13px;"></li>
+          <li><strong>Indication:</strong> ${document.getElementById('indication').options[document.getElementById('indication').selectedIndex].text.split('(')[0].trim()} <input type="text" id="indicationSpecify" value="" placeholder="(please specify)" style="border: none; border-bottom: 2px solid #D68910; background: transparent; width: 300px; padding: 2px 4px; font-family: Arial, sans-serif; font-size: 13px; font-weight: normal;"></li>
           <li><strong>IV Access:</strong> ${document.getElementById('ivAccess').options[document.getElementById('ivAccess').selectedIndex].text}</li>
       </ul>`;
   if(document.getElementById('noteSummaryList')) document.getElementById('noteSummaryList').innerHTML = clinicalNoteSummaryHTML;
@@ -818,13 +818,13 @@ if (showSection42) {
 // --- COPY TO NOTES LOGIC (FINAL CORRECTED) ---
 function copyClinicalNote() {
   // Define the base styles for the note
-  const bodyInlineStyle = `font-family: Arial, Helvetica, sans-serif; font-size: 13px;`;
+  const bodyInlineStyle = `font-family: Calibri, Arial, sans-serif; font-size: 10pt;`;
   const titleInlineStyle = `
       color: #800000; 
       font-weight: 700; 
       font-style: italic; 
-      font-size: 13px; 
-      font-family: Arial, Helvetica, sans-serif;
+      font-size: 10pt; 
+      font-family: Calibri, Arial, sans-serif;
   `;
   
   const htmlContentDiv = document.getElementById('clinicalNoteContent');
@@ -871,19 +871,14 @@ function copyClinicalNote() {
   }
 
   // --- Fix Indication Input (in Patient Summary) ---
-  const summaryList = tempDiv.querySelector('#noteSummaryList');
-  if (summaryList) {
-      const indicationInput = summaryList.querySelector('input');
-      if (indicationInput) {
-          const liveIndicationInput = document.getElementById('noteSummaryList').querySelector('input');
-          if (liveIndicationInput) {
-              replaceInputWithValue(liveIndicationInput, indicationInput);
-          }
-      }
+  const indicationInputCloned = tempDiv.querySelector('#indicationSpecify');
+  const indicationInputLive = document.getElementById('indicationSpecify');
+  if (indicationInputLive && indicationInputCloned) {
+      replaceInputWithValue(indicationInputLive, indicationInputCloned);
   }
 
   // 3. Apply styles and add spacing for copy-paste
-  tempDiv.setAttribute('style', 'font-family: Arial, Helvetica, sans-serif; font-size: 13px;');
+  tempDiv.setAttribute('style', 'font-family: Calibri, Arial, sans-serif; font-size: 10pt;');
   
   // Add spacing between major sections by adding margin-bottom to divs
   tempDiv.querySelectorAll('div[style*="margin-bottom: 24px"]').forEach(div => {
@@ -895,7 +890,7 @@ function copyClinicalNote() {
       titleElement.setAttribute('style', titleInlineStyle);
   });
   tempDiv.querySelectorAll('.bold-highlight').forEach(element => {
-      element.setAttribute('style', `color: #000000; font-weight: 400; font-size: 13px;`);
+      element.setAttribute('style', `color: #000000; font-weight: 400; font-size: 10pt; font-family: Calibri, Arial, sans-serif;`);
       const labelStrong = element.querySelector('strong');
       if(labelStrong) {
           labelStrong.setAttribute('style', 'font-weight: 700; color: #000000;');
@@ -914,8 +909,8 @@ function copyClinicalNote() {
   // --- Prepare the Plain Text (This section should be fine) ---
   
   const doctorNamePlaceholder = drInputLive ? drInputLive.value.trim() : '_______________';
-  // Use the new requested wording for the intro sentence
-  const introTextPlain = `Received query regarding IV Vancomycin initiation for this patient from Dr: ${doctorNamePlaceholder}`;
+  // Match HTML version wording
+  const introTextPlain = `Received query from Dr ${doctorNamePlaceholder} regarding IV Vancomycin initiation for this patient.`;
   
   const getTDMTextFromLiveDOM = (elementId) => {
     const element = document.getElementById(elementId);
@@ -951,14 +946,23 @@ function copyClinicalNote() {
   textToCopy += 'Patient Summary (as provided by the primary care team):\n';
   textToCopy += `• Actual Body Weight: ${abw} kg\n`;
   textToCopy += `• Dialysis Status: ${statusText}\n`;
-  if (statusText.includes('Haemodialysis')) textToCopy += `• Vancomycin Timing: ${document.getElementById('dialysisTiming').options[document.getElementById('dialysisTiming').selectedIndex].text.replace('Vancomycin started or planned to be given ', '')}\n`;
+  if (statusText.includes('Haemodialysis')) {
+      const timingText = document.getElementById('dialysisTiming').options[document.getElementById('dialysisTiming').selectedIndex].text;
+      if (!timingText.includes('Please select')) {
+          textToCopy += `• Vancomycin Timing: ${timingText.replace('Vancomycin started or planned to be given ', '')}\n`;
+      }
+  }
   
   if (statusText === 'Not on Haemodialysis') {
       textToCopy += `• Serum Creatinine (μmol/L): ${document.getElementById('scr_input').value}\n`;
       textToCopy += `• Creatinine Clearance: ${crclValue} ml/min\n`;
   }
   
-  textToCopy += `• Indication: ${indicationText}\n`;
+  // Get both the main indication text AND the user's specification
+  const indicationMainText = document.getElementById('indication').options[document.getElementById('indication').selectedIndex].text.split('(')[0].trim();
+  const indicationSpec = document.getElementById('indicationSpecify') ? document.getElementById('indicationSpecify').value.trim() : '';
+  const fullIndication = indicationSpec ? `${indicationMainText} (${indicationSpec})` : indicationMainText;
+  textToCopy += `• Indication: ${fullIndication}\n`;
   textToCopy += `• Type of IV Access: ${ivAccessText}\n\n`;
 
   textToCopy += 'Recommended Regimen:\n';
@@ -966,8 +970,38 @@ function copyClinicalNote() {
   textToCopy += `Maintenance Dose: ${noteMDRegimenText}\n\n`;
 
   textToCopy += 'Therapeutic Drug Monitoring (TDM):\n';
-  if(tdm1 && tdm1 !== 'TDM instructions not generated.') textToCopy += `• ${tdm1}\n`;
-  if(tdm2 && tdm2.includes('Post-level')) textToCopy += `• ${tdm2}\n`;
+  
+  // Build TDM1 text manually from the HTML content
+  const tdm1Element = document.getElementById('noteTDM1');
+  if (tdm1Element && tdm1Element.innerHTML && !tdm1Element.innerHTML.includes('not generated')) {
+    // Get the input value
+    const tdm1Input = document.getElementById('tdm1DateTime');
+    const tdm1Value = tdm1Input ? tdm1Input.value.trim() : '';
+    
+    // Get the HTML and extract text before "- Date & time:"
+    const tdm1Html = tdm1Element.innerHTML;
+    const beforeDateTime = tdm1Html.split('- Date & time:')[0].replace(/<[^>]*>/g, '').trim();
+    
+    // Build complete line
+    const tdm1Line = `${beforeDateTime} - Date/Time: ${tdm1Value}`;
+    textToCopy += `• ${tdm1Line}\n`;
+  }
+  
+  // Build TDM2 text manually from the HTML content  
+  const tdm2Element = document.getElementById('noteTDM2');
+  if (tdm2Element && tdm2Element.innerHTML && tdm2Element.innerHTML.includes('Post-level')) {
+    // Get the input value
+    const tdm2Input = document.getElementById('tdm2DateTime');
+    const tdm2Value = tdm2Input ? tdm2Input.value.trim() : '';
+    
+    // Get the HTML and extract text before "- Date & time:"
+    const tdm2Html = tdm2Element.innerHTML;
+    const beforeDateTime = tdm2Html.split('- Date & time:')[0].replace(/<[^>]*>/g, '').trim();
+    
+    // Build complete line
+    const tdm2Line = `${beforeDateTime} - Date/Time: ${tdm2Value}`;
+    textToCopy += `• ${tdm2Line}\n`;
+  }
   
   textToCopy += '\nRemarks:\n';
   textToCopy += '• Monitor renal profile (RP) and urine output regularly.\n';
