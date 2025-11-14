@@ -896,10 +896,17 @@ function copyClinicalNote() {
           labelStrong.setAttribute('style', 'font-weight: 700; color: #000000;');
       }
   });
+  // Preserve white text color for header (maroon background)
+  const headerDiv = tempDiv.querySelector('div[style*="background-color: #800000"]');
+  const headerP = headerDiv ? headerDiv.querySelector('p') : null;
+  
   tempDiv.querySelectorAll('p, li, ul').forEach(element => {
       if(!element.classList.contains('card-title')) {
-         element.style.color = '#000000';
-         element.style.fontWeight = '400';
+         // Don't change color if it's the header paragraph (white text on maroon)
+         if (element !== headerP) {
+             element.style.color = '#000000';
+             element.style.fontWeight = '400';
+         }
       }
   });
   
